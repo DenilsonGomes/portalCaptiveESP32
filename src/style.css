@@ -1,5 +1,5 @@
 body {
-    background-color: #eee;
+    background-color: white;
     border: 0;
     margin: 0;
     font: 1.1em tahoma, arial, sans-serif;
@@ -116,7 +116,7 @@ h3 {
     display: none;
 }
 #connect_manual {
-    display: none;
+    display: block;
 }
 #manual_ssid {
     border: none;
@@ -132,6 +132,30 @@ h3 {
     padding: 10px 0px 10px 10px;
     display: block
 }
+
+
+#server_mqtt {
+    border: none;
+    width: 80%;
+    margin-left: 35px;
+    padding: 10px 0px 10px 10px;
+    display: block
+}
+#token_mqtt {
+    border: none;
+    width: 80%;
+    margin-left: 35px;
+    padding: 10px 0px 10px 10px;
+    display: block
+}
+#topic_mqtt {
+    border: none;
+    width: 80%;
+    margin-left: 35px;
+    padding: 10px 0px 10px 10px;
+    display: block
+}
+
 #pwd {
     border: none;
     width: 80%;
