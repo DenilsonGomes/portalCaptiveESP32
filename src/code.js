@@ -196,13 +196,15 @@ async function performConnect(conntype) {
   //stop refreshing wifi list
   stopRefreshAPInterval();
 
+  var server_mqtt;
+  var token_mqtt;
+  var topic_mqtt;
   var pwd;
   if (conntype == "manual") {
     //Grab the manual SSID and PWD
-    selectedSSID = gel("manual_ssid").value;
-    pwd = gel("manual_pwd").value;
-  } else {
-    pwd = gel("pwd").value;
+    server_mqtt = gel("server_mqtt").value;
+    token_mqtt = gel("token_mqtt").value;
+    topic_mqtt = gel("pwd").value;
   }
   //reset connection
   gel("loading").style.display = "block";
@@ -219,8 +221,9 @@ async function performConnect(conntype) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Custom-ssid": selectedSSID,
-      "X-Custom-pwd": pwd,
+      "X-Custom-server_mqtt": server_mqtt,
+      "X-Custom-token_mqtt": token_mqtt,
+      "X-Custom-topic_mqtt": topic_mqtt
     },
     body: { timestamp: Date.now() },
   });
