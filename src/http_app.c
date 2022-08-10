@@ -150,33 +150,53 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 
 
 		/* buffers for the headers */
-		size_t ssid_len = 0, password_len = 0;
-		char *ssid = NULL, *password = NULL;
+		size_t ssid_len = 0, password_len = 0, server_mqtt_len = 0, token_mqtt_len =0, topic_mqtt_len;
+		char *ssid = NULL, *password = NULL, *server_mqtt = NULL, *token_mqtt = NULL, *topic_mqtt = NULL;
 
 		/* len of values provided */
-		ssid_len = httpd_req_get_hdr_value_len(req, "X-Custom-ssid");
-		password_len = httpd_req_get_hdr_value_len(req, "X-Custom-pwd");
+		//ssid_len = httpd_req_get_hdr_value_len(req, "X-Custom-ssid");
+		//password_len = httpd_req_get_hdr_value_len(req, "X-Custom-pwd");
+
+		server_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-server_mqtt");
+		token_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-token_mqtt");
+		topic_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-topic_mqtt");
 
 
 		if(ssid_len && ssid_len <= MAX_SSID_SIZE && password_len && password_len <= MAX_PASSWORD_SIZE){
 
 			/* get the actual value of the headers */
-			ssid = malloc(sizeof(char) * (ssid_len + 1));
-			password = malloc(sizeof(char) * (password_len + 1));
-			httpd_req_get_hdr_value_str(req, "X-Custom-ssid", ssid, ssid_len+1);
-			httpd_req_get_hdr_value_str(req, "X-Custom-pwd", password, password_len+1);
+			//ssid = malloc(sizeof(char) * (ssid_len + 1));
+			//password = malloc(sizeof(char) * (password_len + 1));
+
+			server_mqtt = malloc(sizeof(char) * (server_mqtt_len + 1));
+			token_mqtt = malloc(sizeof(char) * (token_mqtt_len + 1));
+			topic_mqtt = malloc(sizeof(char) * (topic_mqtt_len + 1));
+
+			//httpd_req_get_hdr_value_str(req, "X-Custom-ssid", ssid, ssid_len+1);
+			//httpd_req_get_hdr_value_str(req, "X-Custom-pwd", password, password_len+1);
+
+			httpd_req_get_hdr_value_str(req, "X-Custom-server_mqtt", server_mqtt, server_mqtt_len+1);
+			httpd_req_get_hdr_value_str(req, "X-Custom-token_mqtt", token_mqtt, token_mqtt_len+1);
+			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", topic_mqtt, topic_mqtt_len+1);
+		
 
 			wifi_config_t* config = wifi_manager_get_wifi_sta_config();
 			memset(config, 0x00, sizeof(wifi_config_t));
-			memcpy(config->sta.ssid, ssid, ssid_len);
-			memcpy(config->sta.password, password, password_len);
-			ESP_LOGI(TAG, "ssid: %s, password: %s", ssid, password);
-			ESP_LOGD(TAG, "http_server_post_handler: wifi_manager_connect_async() call");
+			//memcpy(config->sta.ssid, ssid, ssid_len);
+			//memcpy(config->sta.password, password, password_len);
+
+			memcpy(config->sta.server_mqtt, server_mqtt, server_mqtt_len);
+			memcpy(config->sta.token_mqtt, token_mqtt, token_mqtt_len);
+			memcpy(config->sta.topic_mqtt, topic_mqtt, topic_mqtt_len);
+			
+			ESP_LOGI(TAG, "server_mqtt: %s, token_mqtt: %s, topic_mqtt: %s", server_mqtt, token_mqtt, topic_mqtt);
+			//ESP_LOGD(TAG, "http_server_post_handler: wifi_manager_connect_async() call");
 			wifi_manager_connect_async();
 
 			/* free memory */
-			free(ssid);
-			free(password);
+			free(server_mqtt);
+			free(token_mqtt);
+			free(token_mqtt);
 
 			httpd_resp_set_status(req, http_200_hdr);
 			httpd_resp_set_type(req, http_content_type_json);

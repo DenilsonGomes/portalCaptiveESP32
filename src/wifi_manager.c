@@ -235,31 +235,46 @@ esp_err_t wifi_manager_save_sta_config(){
 			return esp_err;
 		}
 
-		sz = sizeof(tmp_conf.sta.ssid);
-		esp_err = nvs_get_blob(handle, "ssid", tmp_conf.sta.ssid, &sz);
-		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.ssid, (char*)wifi_manager_config_sta->sta.ssid) != 0){
-			/* different ssid or ssid does not exist in flash: save new ssid */
-			esp_err = nvs_set_blob(handle, "ssid", wifi_manager_config_sta->sta.ssid, 32);
+		sz = sizeof(tmp_conf.sta.server_mqtt);
+		esp_err = nvs_get_blob(handle, "server_mqtt", tmp_conf.sta.server_mqtt, &sz);
+		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.server_mqtt, (char*)wifi_manager_config_sta->sta.server_mqtt) != 0){
+			/* Caso servidor diferente ou nao exista na flash, grava na flash */
+			esp_err = nvs_set_blob(handle, "server_mqtt", wifi_manager_config_sta->sta.server_mqtt, 256);
 			if (esp_err != ESP_OK){
 				nvs_sync_unlock();
 				return esp_err;
 			}
 			change = true;
-			ESP_LOGI(TAG, "wifi_manager_wrote wifi_sta_config: ssid:%s",wifi_manager_config_sta->sta.ssid);
+			ESP_LOGI(TAG, "Servidor gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.server_mqtt);
 
 		}
 
-		sz = sizeof(tmp_conf.sta.password);
-		esp_err = nvs_get_blob(handle, "password", tmp_conf.sta.password, &sz);
-		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.password, (char*)wifi_manager_config_sta->sta.password) != 0){
-			/* different password or password does not exist in flash: save new password */
-			esp_err = nvs_set_blob(handle, "password", wifi_manager_config_sta->sta.password, 64);
+		sz = sizeof(tmp_conf.sta.token_mqtt);
+		esp_err = nvs_get_blob(handle, "token_mqtt", tmp_conf.sta.token_mqtt, &sz);
+		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.token_mqtt, (char*)wifi_manager_config_sta->sta.token_mqtt) != 0){
+			/* Caso servidor diferente ou nao exista na flash, grava na flash */
+			esp_err = nvs_set_blob(handle, "token_mqtt", wifi_manager_config_sta->sta.token_mqtt, 256);
 			if (esp_err != ESP_OK){
 				nvs_sync_unlock();
 				return esp_err;
 			}
 			change = true;
-			ESP_LOGI(TAG, "wifi_manager_wrote wifi_sta_config: password:%s",wifi_manager_config_sta->sta.password);
+			ESP_LOGI(TAG, "Token mqtt gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.token_mqtt);
+
+		}
+
+		sz = sizeof(tmp_conf.sta.topic_mqtt);
+		esp_err = nvs_get_blob(handle, "topic_mqtt", tmp_conf.sta.topic_mqtt, &sz);
+		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.topic_mqtt, (char*)wifi_manager_config_sta->sta.topic_mqtt) != 0){
+			/* Caso servidor diferente ou nao exista na flash, grava na flash */
+			esp_err = nvs_set_blob(handle, "topic_mqtt", wifi_manager_config_sta->sta.topic_mqtt, 256);
+			if (esp_err != ESP_OK){
+				nvs_sync_unlock();
+				return esp_err;
+			}
+			change = true;
+			ESP_LOGI(TAG, "Topico mqtt gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.topic_mqtt);
+
 		}
 
 		sz = sizeof(tmp_settings);
@@ -334,25 +349,35 @@ bool wifi_manager_fetch_wifi_sta_config(){
 		uint8_t *buff = (uint8_t*)malloc(sizeof(uint8_t) * sz);
 		memset(buff, 0x00, sizeof(sz));
 
-		/* ssid */
-		sz = sizeof(wifi_manager_config_sta->sta.ssid);
-		esp_err = nvs_get_blob(handle, "ssid", buff, &sz);
+		/* server */
+		sz = sizeof(wifi_manager_config_sta->sta.server_mqtt);
+		esp_err = nvs_get_blob(handle, "server_mqtt", buff, &sz);
 		if(esp_err != ESP_OK){
 			free(buff);
 			nvs_sync_unlock();
 			return false;
 		}
-		memcpy(wifi_manager_config_sta->sta.ssid, buff, sz);
+		memcpy(wifi_manager_config_sta->sta.server_mqtt, buff, sz);
 
-		/* password */
-		sz = sizeof(wifi_manager_config_sta->sta.password);
-		esp_err = nvs_get_blob(handle, "password", buff, &sz);
+		/* Token */
+		sz = sizeof(wifi_manager_config_sta->sta.token_mqtt);
+		esp_err = nvs_get_blob(handle, "token_mqtt", buff, &sz);
 		if(esp_err != ESP_OK){
 			free(buff);
 			nvs_sync_unlock();
 			return false;
 		}
-		memcpy(wifi_manager_config_sta->sta.password, buff, sz);
+		memcpy(wifi_manager_config_sta->sta.topic_mqtt, buff, sz);
+
+		/* Topico */
+		sz = sizeof(wifi_manager_config_sta->sta.topic_mqtt);
+		esp_err = nvs_get_blob(handle, "topic_mqtt", buff, &sz);
+		if(esp_err != ESP_OK){
+			free(buff);
+			nvs_sync_unlock();
+			return false;
+		}
+		memcpy(wifi_manager_config_sta->sta.topic_mqtt, buff, sz);
 
 		/* settings */
 		sz = sizeof(wifi_settings);
