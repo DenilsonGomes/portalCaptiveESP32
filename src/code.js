@@ -199,15 +199,15 @@ async function performConnect(conntype) {
   var server_mqtt;
   var token_mqtt;
   var topic_mqtt;
-  var pwd;
+  
   if (conntype == "manual") {
     //Grab the manual SSID and PWD
     server_mqtt = gel("server_mqtt").value;
     token_mqtt = gel("token_mqtt").value;
-    topic_mqtt = gel("pwd").value;
+    topic_mqtt = gel("topic_mqtt").value;
   }
   //reset connection
-  gel("loading").style.display = "block";
+  /* gel("loading").style.display = "block";
   gel("connect-success").style.display = "none";
   gel("connect-fail").style.display = "none";
 
@@ -215,7 +215,7 @@ async function performConnect(conntype) {
   gel("ssid-wait").textContent = selectedSSID;
   connect_div.style.display = "none";
   connect_manual_div.style.display = "none";
-  connect_wait_div.style.display = "block";
+  connect_wait_div.style.display = "block"; */
 
   await fetch("connect.json", {
     method: "POST",
