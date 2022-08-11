@@ -143,7 +143,7 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 
 	esp_err_t ret = ESP_OK;
 
-	ESP_LOGI(TAG, "POST %s", req->uri);
+	ESP_LOGI("TAG de salvar na flash", "POST %s", req->uri);
 
 	/* POST /connect.json */
 	if(strcmp(req->uri, http_connect_url) == 0){
@@ -156,25 +156,25 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 		/* len of values provided */
 		//ssid_len = httpd_req_get_hdr_value_len(req, "X-Custom-ssid");
 		//password_len = httpd_req_get_hdr_value_len(req, "X-Custom-pwd");
-
+		printf("Antes de pegar o tamanho das variaveis");
 		server_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-server_mqtt");
 		token_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-token_mqtt");
 		topic_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-topic_mqtt");
 
 
-		if(ssid_len && ssid_len <= MAX_SSID_SIZE && password_len && password_len <= MAX_PASSWORD_SIZE){
+		if(server_mqtt_len && server_mqtt_len <= 256 && token_mqtt_len && token_mqtt_len <= 256 && topic_mqtt_len && topic_mqtt_len <= 256){
 
 			/* get the actual value of the headers */
 			//ssid = malloc(sizeof(char) * (ssid_len + 1));
 			//password = malloc(sizeof(char) * (password_len + 1));
-
+			
 			server_mqtt = malloc(sizeof(char) * (server_mqtt_len + 1));
 			token_mqtt = malloc(sizeof(char) * (token_mqtt_len + 1));
 			topic_mqtt = malloc(sizeof(char) * (topic_mqtt_len + 1));
 
 			//httpd_req_get_hdr_value_str(req, "X-Custom-ssid", ssid, ssid_len+1);
 			//httpd_req_get_hdr_value_str(req, "X-Custom-pwd", password, password_len+1);
-
+			printf("Antes de pegar o conteudo das variaveis");
 			httpd_req_get_hdr_value_str(req, "X-Custom-server_mqtt", server_mqtt, server_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-token_mqtt", token_mqtt, token_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", topic_mqtt, topic_mqtt_len+1);
@@ -190,8 +190,8 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 			memcpy(config->sta.topic_mqtt, topic_mqtt, topic_mqtt_len);
 			
 			ESP_LOGI(TAG, "server_mqtt: %s, token_mqtt: %s, topic_mqtt: %s", server_mqtt, token_mqtt, topic_mqtt);
-			//ESP_LOGD(TAG, "http_server_post_handler: wifi_manager_connect_async() call");
-			wifi_manager_connect_async();
+			//ESP_LOGD(TAG, "Variaveis server, token e topic copiadas para config");
+			//wifi_manager_connect_async();
 
 			/* free memory */
 			free(server_mqtt);

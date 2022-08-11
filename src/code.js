@@ -200,14 +200,12 @@ async function performConnect(conntype) {
   var token_mqtt;
   var topic_mqtt;
   
-  if (conntype == "manual") {
-    //Grab the manual SSID and PWD
-    server_mqtt = gel("server_mqtt").value;
-    token_mqtt = gel("token_mqtt").value;
-    topic_mqtt = gel("topic_mqtt").value;
-  }
+  server_mqtt = gel("server_mqtt").value;
+  token_mqtt = gel("token_mqtt").value;
+  topic_mqtt = gel("topic_mqtt").value;
+  
   //reset connection
-  /* gel("loading").style.display = "block";
+  gel("loading").style.display = "block";
   gel("connect-success").style.display = "none";
   gel("connect-fail").style.display = "none";
 
@@ -215,7 +213,7 @@ async function performConnect(conntype) {
   gel("ssid-wait").textContent = selectedSSID;
   connect_div.style.display = "none";
   connect_manual_div.style.display = "none";
-  connect_wait_div.style.display = "block"; */
+  connect_wait_div.style.display = "block";
 
   await fetch("connect.json", {
     method: "POST",
@@ -223,14 +221,14 @@ async function performConnect(conntype) {
       "Content-Type": "application/json",
       "X-Custom-server_mqtt": server_mqtt,
       "X-Custom-token_mqtt": token_mqtt,
-      "X-Custom-topic_mqtt": topic_mqtt
+      "X-Custom-topic_mqtt": topic_mqtt,
     },
     body: { timestamp: Date.now() },
   });
 
   //now we can re-set the intervals regardless of result
-  startCheckStatusInterval();
-  startRefreshAPInterval();
+  //startCheckStatusInterval();
+  //startRefreshAPInterval();
 }
 
 function rssiToIcon(rssi) {
