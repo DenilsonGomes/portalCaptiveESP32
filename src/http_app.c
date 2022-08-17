@@ -144,24 +144,24 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 	esp_err_t ret = ESP_OK;
 
 	ESP_LOGI("TAG de salvar na flash", "POST %s", req->uri);
-
+	printf("Req URI: %s\nhttp_connect_url: %s\n", req->uri, http_connect_url);
 	/* POST /connect.json */
 	if(strcmp(req->uri, http_connect_url) == 0){
 
 
 		/* buffers for the headers */
-		size_t ssid_len = 0, password_len = 0, server_mqtt_len = 0, token_mqtt_len =0, topic_mqtt_len;
-		char *ssid = NULL, *password = NULL, *server_mqtt = NULL, *token_mqtt = NULL, *topic_mqtt = NULL;
+		size_t server_mqtt_len = 0, token_mqtt_len =0, topic_mqtt_len;
+		char *server_mqtt = NULL, *token_mqtt = NULL, *topic_mqtt = NULL;
 
 		/* len of values provided */
 		//ssid_len = httpd_req_get_hdr_value_len(req, "X-Custom-ssid");
 		//password_len = httpd_req_get_hdr_value_len(req, "X-Custom-pwd");
-		printf("Antes de pegar o tamanho das variaveis");
+		
 		server_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-server_mqtt");
 		token_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-token_mqtt");
 		topic_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-topic_mqtt");
 
-
+		printf("Sizes: %d\t%d\t%d\n", server_mqtt_len, token_mqtt_len, topic_mqtt_len);
 		if(server_mqtt_len && server_mqtt_len <= 256 && token_mqtt_len && token_mqtt_len <= 256 && topic_mqtt_len && topic_mqtt_len <= 256){
 
 			/* get the actual value of the headers */
@@ -174,11 +174,12 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 
 			//httpd_req_get_hdr_value_str(req, "X-Custom-ssid", ssid, ssid_len+1);
 			//httpd_req_get_hdr_value_str(req, "X-Custom-pwd", password, password_len+1);
-			printf("Antes de pegar o conteudo das variaveis");
+			printf("Pegando o conteudo das variaveis");
 			httpd_req_get_hdr_value_str(req, "X-Custom-server_mqtt", server_mqtt, server_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-token_mqtt", token_mqtt, token_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", topic_mqtt, topic_mqtt_len+1);
-		
+
+			printf("Server: %s\tToken: %s\tTopic: %s\n", server_mqtt, token_mqtt, topic_mqtt);
 
 			wifi_config_t* config = wifi_manager_get_wifi_sta_config();
 			memset(config, 0x00, sizeof(wifi_config_t));
@@ -193,27 +194,32 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 			//ESP_LOGD(TAG, "Variaveis server, token e topic copiadas para config");
 			//wifi_manager_connect_async();
 
-			/* free memory */
-			free(server_mqtt);
-			free(token_mqtt);
-			free(token_mqtt);
-
 			httpd_resp_set_status(req, http_200_hdr);
 			httpd_resp_set_type(req, http_content_type_json);
 			httpd_resp_set_hdr(req, http_cache_control_hdr, http_cache_control_no_cache);
 			httpd_resp_set_hdr(req, http_pragma_hdr, http_pragma_no_cache);
 			httpd_resp_send(req, NULL, 0);
+			
+			ESP_LOGI(TAG, "Enviado http resp");
 
+			/* free memory */
+			memset(server_mqtt, 0x00, sizeof(server_mqtt_len+1));
+			memset(token_mqtt, 0x00, sizeof(token_mqtt_len+1));
+			memset(token_mqtt, 0x00, sizeof(token_mqtt_len+1));
+			/* free(server_mqtt);
+			free(token_mqtt);
+			free(token_mqtt); */
 		}
 		else{
 			/* bad request the authentification header is not complete/not the correct format */
+			printf("Entrou no else dos size\n");
 			httpd_resp_set_status(req, http_400_hdr);
 			httpd_resp_send(req, NULL, 0);
 		}
 
 	}
 	else{
-
+		printf("Entrou no else do strcomp\n");
 		if(custom_post_httpd_uri_handler == NULL){
 			httpd_resp_set_status(req, http_404_hdr);
 			httpd_resp_send(req, NULL, 0);

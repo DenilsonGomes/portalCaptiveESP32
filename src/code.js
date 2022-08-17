@@ -1,11 +1,12 @@
 // save some bytes
 const gel = (e) => document.getElementById(e);
 
-const wifi_div = gel("wifi");
+/* const wifi_div = gel("wifi");
 const connect_div = gel("connect");
-const connect_manual_div = gel("connect_manual");
 const connect_wait_div = gel("connect-wait");
-const connect_details_div = gel("connect-details");
+const connect_details_div = gel("connect-details"); */
+const connect_manual_div = gel("connect_manual");
+
 
 function docReady(fn) {
   // see if DOM is already available
@@ -47,7 +48,7 @@ function startRefreshAPInterval() {
 }
 
 docReady(async function () {
-  gel("wifi-status").addEventListener(
+  /* gel("wifi-status").addEventListener(
     "click",
     () => {
       wifi_div.style.display = "none";
@@ -84,28 +85,39 @@ docReady(async function () {
     false
   );
 
+   */
+
+  /* gel("join").addEventListener("click", performConnect, false);
+  gel("cancel").addEventListener("click", cancel, false); */
+
   function cancel() {
     selectedSSID = "";
     connect_div.style.display = "none";
     connect_manual_div.style.display = "none";
     wifi_div.style.display = "block";
   }
-
-  gel("cancel").addEventListener("click", cancel, false);
-
   gel("manual_cancel").addEventListener("click", cancel, false);
 
-  gel("join").addEventListener("click", performConnect, false);
+  const server_mqtt_teste = document.getElementById("server_mqtt").value;
+  const token_mqtt_teste = document.getElementById("token_mqtt").value;
+  const topic_mqtt_teste = document.getElementById("topic_mqtt").value;
+ /*  const manual_join = document.getElementById("manual_join");
+  
+  manual_join.addEventListener("click", function(){
+    console.log(server_mqtt_teste, token_mqtt_teste, topic_mqtt_teste);
+  }) */
 
-  gel("manual_join").addEventListener(
+  gel("manual_join").addEventListener("click", performConnect, false);
+
+  /*gel("manual_join").addEventListener(
     "click",
     (e) => {
-      performConnect("manual");
+      
     },
     false
-  );
-
-  gel("ok-details").addEventListener(
+  );*/
+  
+  /* gel("ok-details").addEventListener(
     "click",
     () => {
       connect_details_div.style.display = "none";
@@ -184,17 +196,17 @@ docReady(async function () {
   //first time the page loads: attempt get the connection status and start the wifi scan
   await refreshAP();
   startCheckStatusInterval();
-  startRefreshAPInterval();
+  startRefreshAPInterval(); */
 });
 
 async function performConnect(conntype) {
   //stop the status refresh. This prevents a race condition where a status
   //request would be refreshed with wrong ip info from a previous connection
   //and the request would automatically shows as succesful.
-  stopCheckStatusInterval();
+  /* stopCheckStatusInterval();
 
   //stop refreshing wifi list
-  stopRefreshAPInterval();
+  stopRefreshAPInterval(); */
 
   var server_mqtt;
   var token_mqtt;
@@ -205,7 +217,7 @@ async function performConnect(conntype) {
   topic_mqtt = gel("topic_mqtt").value;
   
   //reset connection
-  gel("loading").style.display = "block";
+  /* gel("loading").style.display = "block";
   gel("connect-success").style.display = "none";
   gel("connect-fail").style.display = "none";
 
@@ -213,9 +225,10 @@ async function performConnect(conntype) {
   gel("ssid-wait").textContent = selectedSSID;
   connect_div.style.display = "none";
   connect_manual_div.style.display = "none";
-  connect_wait_div.style.display = "block";
+  connect_wait_div.style.display = "block"; */
+  console.log(server_mqtt,token_mqtt,topic_mqtt);
 
-  await fetch("connect.json", {
+  const conexao = await fetch("connect.json", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -225,11 +238,12 @@ async function performConnect(conntype) {
     },
     body: { timestamp: Date.now() },
   });
-
+  console.log(conexao);
   //now we can re-set the intervals regardless of result
   //startCheckStatusInterval();
   //startRefreshAPInterval();
 }
+
 
 function rssiToIcon(rssi) {
   if (rssi >= -60) {
