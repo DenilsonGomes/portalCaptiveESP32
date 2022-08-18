@@ -225,16 +225,16 @@ esp_err_t wifi_manager_save_sta_config(){
 	memset(&tmp_settings, 0x00, sizeof(tmp_settings));
 	bool change = false;
 
-	ESP_LOGI(TAG, "About to save config to flash!!");
-
-	if(wifi_manager_config_sta && nvs_sync_lock( portMAX_DELAY )){
+	
+	if(nvs_sync_lock( portMAX_DELAY )){
 
 		esp_err = nvs_open(wifi_manager_nvs_namespace, NVS_READWRITE, &handle);
 		if (esp_err != ESP_OK){
 			nvs_sync_unlock();
 			return esp_err;
 		}
-
+		ESP_LOGI(TAG, "Salvando na flash!!");
+		
 		sz = sizeof(tmp_conf.sta.server_mqtt);
 		esp_err = nvs_get_blob(handle, "server_mqtt", tmp_conf.sta.server_mqtt, &sz);
 		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.server_mqtt, (char*)wifi_manager_config_sta->sta.server_mqtt) != 0){
@@ -246,7 +246,7 @@ esp_err_t wifi_manager_save_sta_config(){
 			}
 			change = true;
 			ESP_LOGI(TAG, "Servidor gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.server_mqtt);
-
+			printf("Entrou no if de salvar servidor na flash\n");
 		}
 
 		sz = sizeof(tmp_conf.sta.token_mqtt);
@@ -260,7 +260,7 @@ esp_err_t wifi_manager_save_sta_config(){
 			}
 			change = true;
 			ESP_LOGI(TAG, "Token mqtt gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.token_mqtt);
-
+			printf("Entrou no if de salvar mqtt na flash\n");
 		}
 
 		sz = sizeof(tmp_conf.sta.topic_mqtt);
@@ -274,7 +274,7 @@ esp_err_t wifi_manager_save_sta_config(){
 			}
 			change = true;
 			ESP_LOGI(TAG, "Topico mqtt gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.topic_mqtt);
-
+			printf("Entrou no if de salvar token na flash\n");
 		}
 
 		sz = sizeof(tmp_settings);
@@ -789,7 +789,8 @@ void wifi_manager_connect_async(){
 		wifi_manager_clear_ip_info_json();
 		wifi_manager_unlock_json_buffer();
 	}
-	wifi_manager_send_message(WM_ORDER_CONNECT_STA, (void*)CONNECTION_REQUEST_USER);
+	//wifi_manager_send_message(WM_ORDER_CONNECT_STA, (void*)CONNECTION_REQUEST_USER);
+	wifi_manager_send_message(WM_ORDER_STOP_AP, (void*)NULL);
 }
 
 
@@ -999,7 +1000,7 @@ void wifi_manager( void * pvParameters ){
 	};
 
 	/* enqueue first event: load previous config */
-	wifi_manager_send_message(WM_ORDER_LOAD_AND_RESTORE_STA, NULL);
+	wifi_manager_send_message(WM_ORDER_START_AP, NULL);
 
 
 	/* main processing loop */
@@ -1238,6 +1239,7 @@ void wifi_manager( void * pvParameters ){
 
 				ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
+				printf("Iniciando webserver\n");
 				/* restart HTTP daemon */
 				http_app_stop();
 				http_app_start(true);
@@ -1259,22 +1261,49 @@ void wifi_manager( void * pvParameters ){
 				/* before stopping the AP, we check that we are still connected. There's a chance that once the timer
 				 * kicks in, for whatever reason the esp32 is already disconnected.
 				 */
-				if(uxBits & WIFI_MANAGER_WIFI_CONNECTED_BIT){
+				/* if(uxBits & WIFI_MANAGER_WIFI_CONNECTED_BIT){
+					
+					// Salva variavies na flash
+					wifi_manager_save_sta_config();
 
-					/* set to STA only */
-					esp_wifi_set_mode(WIFI_MODE_STA);
+					// set to STA only 
+					//esp_wifi_set_mode(WIFI_MODE_STA);
 
-					/* stop DNS */
+					// stop DNS 
 					dns_server_stop();
 
-					/* restart HTTP daemon */
+					// restart HTTP daemon 
 					http_app_stop();
 					http_app_start(false);
 
-					/* callback */
-					if(cb_ptr_arr[msg.code]) (*cb_ptr_arr[msg.code])(NULL);
-				}
+					//Para Access Point
+					esp_err_t retu = esp_wifi_stop();
+					printf("Retorno: %d\n", retu);
 
+					// callback 
+					if(cb_ptr_arr[msg.code]) (*cb_ptr_arr[msg.code])(NULL);
+				} */
+
+				// Salva variavies na flash
+				wifi_manager_save_sta_config();
+
+				/* set to STA only */
+				esp_wifi_set_mode(WIFI_MODE_STA);
+
+				/* stop DNS */
+				dns_server_stop();
+
+				/* restart HTTP daemon */
+				http_app_stop();
+				http_app_start(false);
+
+				//Para Access Point
+				/* esp_err_t retu = esp_wifi_deinit();
+				printf("Retorno: %d\n", retu); */
+
+				/* callback */
+				if(cb_ptr_arr[msg.code]) (*cb_ptr_arr[msg.code])(NULL);
+				
 				break;
 
 			case WM_EVENT_STA_GOT_IP:
