@@ -143,11 +143,9 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 
 	esp_err_t ret = ESP_OK;
 
-	ESP_LOGI("TAG de salvar na flash", "POST %s", req->uri);
-	printf("Req URI: %s\nhttp_connect_url: %s\n", req->uri, http_connect_url);
+	ESP_LOGI("Post_handler", "Req URI: %s\nhttp_connect_url: %s\n", req->uri, http_connect_url);
 	/* POST /connect.json */
 	if(strcmp(req->uri, http_connect_url) == 0){
-
 
 		/* buffers for the headers */
 		size_t server_mqtt_len = 0, token_mqtt_len =0, topic_mqtt_len;
@@ -174,7 +172,7 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 
 			//httpd_req_get_hdr_value_str(req, "X-Custom-ssid", ssid, ssid_len+1);
 			//httpd_req_get_hdr_value_str(req, "X-Custom-pwd", password, password_len+1);
-			printf("Pegando o conteudo das variaveis");
+			printf("Pegando o conteudo das variaveis\n");
 			httpd_req_get_hdr_value_str(req, "X-Custom-server_mqtt", server_mqtt, server_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-token_mqtt", token_mqtt, token_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", topic_mqtt, topic_mqtt_len+1);
@@ -209,6 +207,9 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 			/* free(server_mqtt);
 			free(token_mqtt);
 			free(token_mqtt); */
+
+			// Recebido a variaveis, salvar na flash e parar Webserver e AP
+			wifi_manager_connect_async();
 		}
 		else{
 			/* bad request the authentification header is not complete/not the correct format */
