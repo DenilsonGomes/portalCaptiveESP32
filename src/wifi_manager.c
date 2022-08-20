@@ -86,7 +86,7 @@ wifi_config_t* wifi_manager_config_sta = NULL;
 void (**cb_ptr_arr)(void*) = NULL;
 
 /* @brief tag used for ESP serial console messages */
-static const char TAG[] = "wifi_manager";
+static const char TAG[] = "Portal_Captive";
 
 /* @brief task handle for the main wifi_manager task */
 static TaskHandle_t task_wifi_manager = NULL;
@@ -179,8 +179,8 @@ void wifi_manager_start(){
 	esp_log_level_set("wifi", ESP_LOG_NONE);
 
 	/* initialize flash memory */
-	nvs_flash_init();
-	ESP_ERROR_CHECK(nvs_sync_create()); /* semaphore for thread synchronization on NVS memory */
+	//nvs_flash_init();
+	//ESP_ERROR_CHECK(nvs_sync_create()); /* semaphore for thread synchronization on NVS memory */
 
 	/* memory allocation */
 	wifi_manager_queue = xQueueCreate( 3, sizeof( queue_message) );
@@ -245,8 +245,8 @@ esp_err_t wifi_manager_save_sta_config(){
 				return esp_err;
 			}
 			change = true;
-			ESP_LOGI(TAG, "Servidor gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.server_mqtt);
-			printf("Entrou no if de salvar servidor na flash\n");
+			ESP_LOGI(TAG, "Gravando servidor na flash: %s",wifi_manager_config_sta->sta.server_mqtt);
+			//printf("Entrou no if de salvar servidor na flash\n");
 		}
 
 		sz = sizeof(tmp_conf.sta.token_mqtt);
@@ -259,8 +259,8 @@ esp_err_t wifi_manager_save_sta_config(){
 				return esp_err;
 			}
 			change = true;
-			ESP_LOGI(TAG, "Token mqtt gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.token_mqtt);
-			printf("Entrou no if de salvar mqtt na flash\n");
+			ESP_LOGI(TAG, "Gravando token na flash: %s",wifi_manager_config_sta->sta.token_mqtt);
+			//printf("Entrou no if de salvar mqtt na flash\n");
 		}
 
 		sz = sizeof(tmp_conf.sta.topic_mqtt);
@@ -273,8 +273,8 @@ esp_err_t wifi_manager_save_sta_config(){
 				return esp_err;
 			}
 			change = true;
-			ESP_LOGI(TAG, "Topico mqtt gravado na flash com sucesso: %s",wifi_manager_config_sta->sta.topic_mqtt);
-			printf("Entrou no if de salvar token na flash\n");
+			ESP_LOGI(TAG, "Gravando topico na flash: %s",wifi_manager_config_sta->sta.topic_mqtt);
+			//printf("Entrou no if de salvar token na flash\n");
 		}
 
 		sz = sizeof(tmp_settings);
@@ -308,6 +308,7 @@ esp_err_t wifi_manager_save_sta_config(){
 
 		if(change){
 			esp_err = nvs_commit(handle);
+			ESP_LOGI(TAG, "Variaveis gravadas na flash com sucesso.");
 		}
 		else{
 			ESP_LOGI(TAG, "Wifi config was not saved to flash because no change has been detected.");
@@ -1239,7 +1240,7 @@ void wifi_manager( void * pvParameters ){
 
 				ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
-				printf("Iniciando webserver\n");
+				ESP_LOGI(TAG, "Iniciando webserver\n");
 				/* restart HTTP daemon */
 				http_app_stop();
 				http_app_start(true);
@@ -1297,13 +1298,8 @@ void wifi_manager( void * pvParameters ){
 				http_app_stop();
 				http_app_start(false);
 
-				//Para Access Point
-				/* esp_err_t retu = esp_wifi_deinit();
-				printf("Retorno: %d\n", retu); */
-
-				/* callback */
-				if(cb_ptr_arr[msg.code]) (*cb_ptr_arr[msg.code])(NULL);
-				
+				// Reinicia ESP
+				esp_restart();
 				break;
 
 			case WM_EVENT_STA_GOT_IP:
