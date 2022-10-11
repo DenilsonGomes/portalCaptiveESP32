@@ -148,8 +148,8 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 	if(strcmp(req->uri, http_connect_url) == 0){
 
 		/* buffers for the headers */
-		size_t server_mqtt_len = 0, token_mqtt_len =0, topic_mqtt_len;
-		char *server_mqtt = NULL, *token_mqtt = NULL, *topic_mqtt = NULL;
+		size_t server_mqtt_len = 0, token_mqtt_len =0, latitude_len = 0, longitude_len = 0;
+		char *server_mqtt = NULL, *token_mqtt = NULL, *latitude = NULL, *longitude = NULL;
 
 		/* len of values provided */
 		//ssid_len = httpd_req_get_hdr_value_len(req, "X-Custom-ssid");
@@ -157,10 +157,11 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 		
 		server_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-server_mqtt");
 		token_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-token_mqtt");
-		topic_mqtt_len = httpd_req_get_hdr_value_len(req, "X-Custom-topic_mqtt");
+		latitude_len = httpd_req_get_hdr_value_len(req, "X-Custom-latitude");
+		longitude_len = httpd_req_get_hdr_value_len(req, "X-Custom-longitude");
 
-		printf("Sizes: %d\t%d\t%d\n", server_mqtt_len, token_mqtt_len, topic_mqtt_len);
-		if(server_mqtt_len && server_mqtt_len <= 256 && token_mqtt_len && token_mqtt_len <= 256 && topic_mqtt_len && topic_mqtt_len <= 256){
+		printf("Sizes: %d\t%d\t%d\t%d\n", server_mqtt_len, token_mqtt_len, latitude_len, longitude_len);
+		if(server_mqtt_len && server_mqtt_len <= 256 && token_mqtt_len && token_mqtt_len <= 256 && latitude_len && latitude_len <= 32 && longitude_len && longitude_len <= 32){
 
 			/* get the actual value of the headers */
 			//ssid = malloc(sizeof(char) * (ssid_len + 1));
@@ -168,16 +169,18 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 			
 			server_mqtt = malloc(sizeof(char) * (server_mqtt_len + 1));
 			token_mqtt = malloc(sizeof(char) * (token_mqtt_len + 1));
-			topic_mqtt = malloc(sizeof(char) * (topic_mqtt_len + 1));
+			latitude = malloc(sizeof(char) * (latitude_len + 1));
+			longitude = malloc(sizeof(char) * (longitude_len + 1));
 
 			//httpd_req_get_hdr_value_str(req, "X-Custom-ssid", ssid, ssid_len+1);
 			//httpd_req_get_hdr_value_str(req, "X-Custom-pwd", password, password_len+1);
 			printf("Pegando o conteudo das variaveis\n");
 			httpd_req_get_hdr_value_str(req, "X-Custom-server_mqtt", server_mqtt, server_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-token_mqtt", token_mqtt, token_mqtt_len+1);
-			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", topic_mqtt, topic_mqtt_len+1);
-
-			printf("Server: %s\tToken: %s\tTopic: %s\n", server_mqtt, token_mqtt, topic_mqtt);
+			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", latitude, latitude_len+1);
+			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", longitude, longitude_len+1);
+			
+			printf("Server: %s\tToken: %s\tLatitude: %s\tLongitude: %s\n", server_mqtt, token_mqtt, latitude, longitude);
 
 			wifi_config_t* config = wifi_manager_get_wifi_sta_config();
 			memset(config, 0x00, sizeof(wifi_config_t));
@@ -186,9 +189,10 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 
 			memcpy(config->sta.server_mqtt, server_mqtt, server_mqtt_len);
 			memcpy(config->sta.token_mqtt, token_mqtt, token_mqtt_len);
-			memcpy(config->sta.topic_mqtt, topic_mqtt, topic_mqtt_len);
+			memcpy(config->sta.latitude, latitude, latitude_len);
+			memcpy(config->sta.longitude, longitude, longitude_len);
 			
-			ESP_LOGI(TAG, "server_mqtt: %s, token_mqtt: %s, topic_mqtt: %s", server_mqtt, token_mqtt, topic_mqtt);
+			ESP_LOGI(TAG, "server_mqtt: %s, token_mqtt: %s, latitude: %s, longitude: %s", config->sta.server_mqtt, config->sta.token_mqtt, config->sta.latitude, config->sta.longitude);
 			//ESP_LOGD(TAG, "Variaveis server, token e topic copiadas para config");
 			//wifi_manager_connect_async();
 

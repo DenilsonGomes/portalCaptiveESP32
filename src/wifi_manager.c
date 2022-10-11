@@ -235,6 +235,7 @@ esp_err_t wifi_manager_save_sta_config(){
 		}
 		ESP_LOGI(TAG, "Salvando na flash!!");
 		
+		//Server
 		sz = sizeof(tmp_conf.sta.server_mqtt);
 		esp_err = nvs_get_blob(handle, "server_mqtt", tmp_conf.sta.server_mqtt, &sz);
 		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.server_mqtt, (char*)wifi_manager_config_sta->sta.server_mqtt) != 0){
@@ -249,6 +250,7 @@ esp_err_t wifi_manager_save_sta_config(){
 			//printf("Entrou no if de salvar servidor na flash\n");
 		}
 
+		//Token
 		sz = sizeof(tmp_conf.sta.token_mqtt);
 		esp_err = nvs_get_blob(handle, "token_mqtt", tmp_conf.sta.token_mqtt, &sz);
 		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.token_mqtt, (char*)wifi_manager_config_sta->sta.token_mqtt) != 0){
@@ -263,18 +265,34 @@ esp_err_t wifi_manager_save_sta_config(){
 			//printf("Entrou no if de salvar mqtt na flash\n");
 		}
 
-		sz = sizeof(tmp_conf.sta.topic_mqtt);
-		esp_err = nvs_get_blob(handle, "topic_mqtt", tmp_conf.sta.topic_mqtt, &sz);
-		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.topic_mqtt, (char*)wifi_manager_config_sta->sta.topic_mqtt) != 0){
+		//Latitude
+		sz = sizeof(tmp_conf.sta.latitude);
+		esp_err = nvs_get_blob(handle, "latitude", tmp_conf.sta.latitude, &sz);
+		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.latitude, (char*)wifi_manager_config_sta->sta.latitude) != 0){
 			/* Caso servidor diferente ou nao exista na flash, grava na flash */
-			esp_err = nvs_set_blob(handle, "topic_mqtt", wifi_manager_config_sta->sta.topic_mqtt, 256);
+			esp_err = nvs_set_blob(handle, "latitude", wifi_manager_config_sta->sta.latitude, sz);
 			if (esp_err != ESP_OK){
 				nvs_sync_unlock();
 				return esp_err;
 			}
 			change = true;
-			ESP_LOGI(TAG, "Gravando topico na flash: %s",wifi_manager_config_sta->sta.topic_mqtt);
-			//printf("Entrou no if de salvar token na flash\n");
+			ESP_LOGI(TAG, "Gravando latitude na flash: %s",wifi_manager_config_sta->sta.latitude);
+			//printf("Entrou no if de salvar latitude na flash\n");
+		}
+
+		//Longitude
+		sz = sizeof(tmp_conf.sta.longitude);
+		esp_err = nvs_get_blob(handle, "longitude", tmp_conf.sta.longitude, &sz);
+		if( (esp_err == ESP_OK  || esp_err == ESP_ERR_NVS_NOT_FOUND) && strcmp( (char*)tmp_conf.sta.longitude, (char*)wifi_manager_config_sta->sta.longitude) != 0){
+			/* Caso servidor diferente ou nao exista na flash, grava na flash */
+			esp_err = nvs_set_blob(handle, "longitude", wifi_manager_config_sta->sta.longitude, sz);
+			if (esp_err != ESP_OK){
+				nvs_sync_unlock();
+				return esp_err;
+			}
+			change = true;
+			ESP_LOGI(TAG, "Gravando longitude na flash: %s",wifi_manager_config_sta->sta.longitude);
+			//printf("Entrou no if de salvar latitude na flash\n");
 		}
 
 		sz = sizeof(tmp_settings);
@@ -368,17 +386,27 @@ bool wifi_manager_fetch_wifi_sta_config(){
 			nvs_sync_unlock();
 			return false;
 		}
-		memcpy(wifi_manager_config_sta->sta.topic_mqtt, buff, sz);
+		memcpy(wifi_manager_config_sta->sta.token_mqtt, buff, sz);
 
-		/* Topico */
-		sz = sizeof(wifi_manager_config_sta->sta.topic_mqtt);
-		esp_err = nvs_get_blob(handle, "topic_mqtt", buff, &sz);
+		/* Latitude */
+		sz = sizeof(wifi_manager_config_sta->sta.latitude);
+		esp_err = nvs_get_blob(handle, "latitude", buff, &sz);
 		if(esp_err != ESP_OK){
 			free(buff);
 			nvs_sync_unlock();
 			return false;
 		}
-		memcpy(wifi_manager_config_sta->sta.topic_mqtt, buff, sz);
+		memcpy(wifi_manager_config_sta->sta.latitude, buff, sz);
+
+		/* Longitude */
+		sz = sizeof(wifi_manager_config_sta->sta.longitude);
+		esp_err = nvs_get_blob(handle, "longitude", buff, &sz);
+		if(esp_err != ESP_OK){
+			free(buff);
+			nvs_sync_unlock();
+			return false;
+		}
+		memcpy(wifi_manager_config_sta->sta.longitude, buff, sz);
 
 		/* settings */
 		sz = sizeof(wifi_settings);

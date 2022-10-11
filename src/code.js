@@ -100,7 +100,8 @@ docReady(async function () {
 
   const server_mqtt_teste = document.getElementById("server_mqtt").value;
   const token_mqtt_teste = document.getElementById("token_mqtt").value;
-  const topic_mqtt_teste = document.getElementById("topic_mqtt").value;
+  const latitude_teste = document.getElementById("latitude").value;
+  const longitude_teste = document.getElementById("longitude").value;
  /*  const manual_join = document.getElementById("manual_join");
   
   manual_join.addEventListener("click", function(){
@@ -210,11 +211,13 @@ async function performConnect(conntype) {
 
   var server_mqtt;
   var token_mqtt;
-  var topic_mqtt;
+  var latitude;
+  var longitude;
   
   server_mqtt = gel("server_mqtt").value;
   token_mqtt = gel("token_mqtt").value;
-  topic_mqtt = gel("topic_mqtt").value;
+  latitude = gel("latitude").value;
+  longitude = gel("longitude").value;
   
   //reset connection
   /* gel("loading").style.display = "block";
@@ -226,7 +229,7 @@ async function performConnect(conntype) {
   connect_div.style.display = "none";
   connect_manual_div.style.display = "none";
   connect_wait_div.style.display = "block"; */
-  console.log(server_mqtt,token_mqtt,topic_mqtt);
+  console.log(server_mqtt,token_mqtt,latitude,longitude);
 
   const conexao = await fetch("connect.json", {
     method: "POST",
@@ -234,7 +237,8 @@ async function performConnect(conntype) {
       "Content-Type": "application/json",
       "X-Custom-server_mqtt": server_mqtt,
       "X-Custom-token_mqtt": token_mqtt,
-      "X-Custom-topic_mqtt": topic_mqtt,
+      "X-Custom-latitude": latitude,
+      "X-Custom-longitude": longitude,
     },
     body: { timestamp: Date.now() },
   });
