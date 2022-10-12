@@ -177,8 +177,8 @@ static esp_err_t http_server_post_handler(httpd_req_t *req){
 			printf("Pegando o conteudo das variaveis\n");
 			httpd_req_get_hdr_value_str(req, "X-Custom-server_mqtt", server_mqtt, server_mqtt_len+1);
 			httpd_req_get_hdr_value_str(req, "X-Custom-token_mqtt", token_mqtt, token_mqtt_len+1);
-			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", latitude, latitude_len+1);
-			httpd_req_get_hdr_value_str(req, "X-Custom-topic_mqtt", longitude, longitude_len+1);
+			httpd_req_get_hdr_value_str(req, "X-Custom-latitude", latitude, latitude_len+1);
+			httpd_req_get_hdr_value_str(req, "X-Custom-longitude", longitude, longitude_len+1);
 			
 			printf("Server: %s\tToken: %s\tLatitude: %s\tLongitude: %s\n", server_mqtt, token_mqtt, latitude, longitude);
 

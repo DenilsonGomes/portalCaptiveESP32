@@ -134,22 +134,8 @@ h3 {
 }
 
 
-#server_mqtt {
-    border: none;
-    width: 80%;
-    margin-left: 35px;
-    padding: 10px 0px 10px 10px;
-    display: block
-}
-#token_mqtt {
-    border: none;
-    width: 80%;
-    margin-left: 35px;
-    padding: 10px 0px 10px 10px;
-    display: block
-}
-#topic_mqtt {
-    border: none;
+#server_mqtt, #token_mqtt, #latitude, #longitude{
+    border: 1px solid #333;
     width: 80%;
     margin-left: 35px;
     padding: 10px 0px 10px 10px;
